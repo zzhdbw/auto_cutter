@@ -1,0 +1,13 @@
+numpy==2.2.6
+funasr==1.2.6
+torch==2.6
+torchaudio==2.6
+ffmpeg-python==0.2.0
+moviepy==1.0.3
+loguru==0.7.3
+opencc==1.1.9
+srt==3.5.3
+soundfile==0.13.1
+tqdm
+moviepy==1.0.3
+
