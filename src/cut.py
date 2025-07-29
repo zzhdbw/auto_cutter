@@ -32,4 +32,7 @@ def cut_video(
             encoding="utf-8",
         ) as f:
             f.write(segment['text'])
-        logger.info(f"Gen {file_name}-{start}-{end}.mp4 down")
+
+        logger.info(
+            f"gen {file_name}-{start}-{end}.mp4, video_length: {end-start:.3f}s, text: {segment['text']}"
+        )

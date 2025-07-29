@@ -41,7 +41,13 @@ class Transcribe:
 
         logger.info(f"模型初始化完成")
 
-    def run(self, inputs: str, output: str, is_force: bool = False):
+    def run(
+        self,
+        inputs: str,
+        output: str,
+        min_duration: float = 0.5,
+        max_duration: float = 5.0,
+    ):
         for input in tqdm(inputs):
             logger.info(f"开始转录音频: {input}")
             name, _ = os.path.splitext(input)
@@ -54,19 +60,24 @@ class Transcribe:
 
             # 去除短段落
             speeches = utils.remove_short_segments(
-                speech_array_indices, 1 * self.sampling_rate
+                segments=speech_array_indices,
+                threshold=min_duration * self.sampling_rate,
             )
 
             # 扩展段落
             speeches = utils.expand_segments(
-                speeches,
-                0.5 * self.sampling_rate,
-                0.0 * self.sampling_rate,
-                audio.shape[0],
+                segments=speeches,
+                expand_head=0.5 * self.sampling_rate,
+                expand_tail=0.0 * self.sampling_rate,
+                total_length=audio.shape[0],
             )
 
             # 合并相邻段落
-            speeches = utils.merge_adjacent_segments(speeches, 0.5 * self.sampling_rate)
+            speeches = utils.merge_adjacent_segments(
+                segments=speeches,
+                threshold=0.5 * self.sampling_rate,
+                max_duration=max_duration,
+            )
 
             transcribe_results = self.asr_model.run_by_indices([audio], [speeches])[0]
 
@@ -97,11 +108,25 @@ if __name__ == "__main__":
         "--input",
         type=str,
         default="data/第二批-20250725/",
+        help="输入文件夹路径",
     )
     parse.add_argument(
         "--output",
         type=str,
         default="output",
+        help="输出文件夹路径",
+    )
+    parse.add_argument(
+        "--min_duration",
+        type=float,
+        default=0.5,
+        help="生成的最小段落时长",
+    )
+    parse.add_argument(
+        "--max_duration",
+        type=float,
+        default=5.0,
+        help="控制合并时生成的最大段落时长，但不能绝对规避最终的长视频",
     )
     args = parse.parse_args()
 

@@ -135,12 +135,12 @@ def expand_segments(segments, expand_head, expand_tail, total_length):
     return results
 
 
-def remove_short_segments(segments, threshold):
+def remove_short_segments(segments, threshold: float):
     # Remove segments whose length < threshold
     return [s for s in segments if s["end"] - s["start"] > threshold]
 
 
-def merge_adjacent_segments(segments, threshold, max_duration=10.0):
+def merge_adjacent_segments(segments, threshold: float, max_duration: float = 10.0):
     # Merge two adjacent segments if their distance < threshold
     # But don't merge if the resulting segment would be longer than max_duration
     results = []
@@ -152,17 +152,18 @@ def merge_adjacent_segments(segments, threshold, max_duration=10.0):
             potential_end = segments[j]["end"]
             potential_duration = potential_end - s["start"]
 
-            # First check if merging would exceed max_duration
+            # 合并时不超过最大长度
             if potential_duration > max_duration:
-                # Stop merging if it would exceed max_duration
                 break
 
-            # Then check if segments are close enough to merge
-            if segments[j]["start"] < s["end"] + threshold:
-                s["end"] = potential_end
-                i = j
-            else:
+            # 不相近的不合并
+            if segments[j]["start"] >= (s["end"] + threshold):
                 break
+
+            # 合并
+            s["end"] = potential_end
+            i = j
+
         i += 1
         results.append(s)
     return results

@@ -17,15 +17,19 @@
 
 ```sh
 python -m src.transcribe \
-  --input data/第二批-20250725 \
-  --output output/第二批
+    --input data/第三批-20250728 \
+    --output output/第三批 \
+    --min_duration 0.5 \
+    --max_duration 5
 ```
 
 input：待剪辑的视频所在的路径
 
-output：结果输出的目录
-
-
+output：结果输出的目录  
+  
+min_duration：最小视频片段长度  
+  
+max_duration：最大视频片段长度
 
 ### 执行
 

@@ -27,7 +27,7 @@ class SenceVoiceBackend(BaseASRBackend):
     def _load_model(self, model_dir: str, device: str):
         self.model = AutoModel(
             model=model_dir,
-            # vad_model="fsmn-vad",
+            vad_model="fsmn-vad",
             vad_kwargs={"max_single_segment_time": 30000},
             punc_model="ct-punc",  # < | zh | > < | NEUTRAL | > < | S pe ech | > < | wo itn | >我从小就羡慕你。
             device=device,
