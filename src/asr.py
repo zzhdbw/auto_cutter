@@ -27,7 +27,7 @@ class SenceVoiceBackend(BaseASRBackend):
     def _load_model(self, model_dir: str, device: str):
         self.model = AutoModel(
             model=model_dir,
-            vad_model="fsmn-vad",
+            # vad_model="fsmn-vad",
             vad_kwargs={"max_single_segment_time": 30000},
             punc_model="ct-punc",  # < | zh | > < | NEUTRAL | > < | S pe ech | > < | wo itn | >我从小就羡慕你。
             device=device,
@@ -71,7 +71,7 @@ class SenceVoiceBackend(BaseASRBackend):
             clean_res = [self._clear_text(r["text"]) for r in batch_r]
             res.extend(clean_res)
 
-        return clean_res
+        return res
 
     def run_by_indices(
         self,
@@ -81,11 +81,11 @@ class SenceVoiceBackend(BaseASRBackend):
     ) -> list[list[dict]]:
 
         res = []
-
         for audio, audio_segs in zip(audios, speech_array_indices):
             audio_segs_indices = [
                 audio[int(seg["start"]) : int(seg["end"])] for seg in audio_segs
             ]
+
             text_list = self.run(
                 audio_segs_indices,
                 language=language,
@@ -93,7 +93,9 @@ class SenceVoiceBackend(BaseASRBackend):
 
             r = []
             for seg, text in zip(audio_segs, text_list):
-                r.append({"text": text, "origin_timestamp": seg})
+                temp = {"text": text, "origin_timestamp": seg}
+
+                r.append(temp)
 
             res.append(r)
 
@@ -110,53 +112,8 @@ if __name__ == "__main__":
     speech_array_indices = vad.run([audio])
 
     res = sence_voice_backend.run_by_indices(
-        audio,
+        [audio],
         speech_array_indices,
     )
 
     print(res)
-# sence_voice_backend = SenceVoiceBackend(model_dir="iic/SenseVoiceSmall")
-
-# import soundfile
-
-# with open(
-#     "/home/zzh/code/ASR/audio_cutter/data/ttv-voice-2025070710054525-esXdbt5v.wav", "rb"
-# ) as f:
-# #     audio = f.read()
-# audio, rate = soundfile.read(
-#     "/home/zzh/code/ASR/audio_cutter/data/ttv-voice-2025070710054525-esXdbt5v.wav"
-# )
-# print(type(audio))
-# # import pydub
-# exit()
-# audio = pydub.from_bytes(audio, format="wav")
-
-
-# res = sence_voice_backend.transcribe([audio])
-
-# # res = sence_voice_backend.transcribe(res)
-# print(res)
-# exit()
-
-# model_dir = "iic/SenseVoiceSmall"
-
-# model = AutoModel(
-#     model=model_dir,
-#     vad_model="fsmn-vad",
-#     vad_kwargs={"max_single_segment_time": 30000},
-#     device="cuda:0",
-#     disable_update=True,
-#     disable_log=True,
-#     disable_pbar=True,
-# )
-
-# res = model.generate(
-#     input=f"{model.model_path}/example/en.mp3",
-#     cache={},
-#     language="auto",  # "zn", "en", "yue", "ja", "ko", "nospeech"
-#     use_itn=True,
-#     batch_size_s=60,
-#     merge_vad=True,  #
-#     merge_length_s=15,
-# )
-# text = rich_transcription_postprocess(res[0]["text"])

@@ -67,9 +67,7 @@ class Transcribe:
 
             # 合并相邻段落
             speeches = utils.merge_adjacent_segments(speeches, 0.5 * self.sampling_rate)
-            # print(speeches)
-            # print(audio)
-            # exit()
+
             transcribe_results = self.asr_model.run_by_indices([audio], [speeches])[0]
 
             # 格式化结果,时间戳转化为秒
